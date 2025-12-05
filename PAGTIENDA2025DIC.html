@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login | EMMANUEL 2025</title>
+
+<style>
+    body {
+        margin: 0;
+        background: linear-gradient(135deg, #4e73df, #1cc88a);
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-family: "Segoe UI", sans-serif;
+        overflow: hidden;
+    }
+
+    /* Animación general de entrada */
+    @keyframes fadeInUp {
+        0% { opacity: 0; transform: translateY(40px) scale(0.95); }
+        100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .login-card {
+        width: 350px;
+        background: white;
+        padding: 30px;
+        border-radius: 18px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        animation: fadeInUp 0.8s ease forwards;
+        text-align: center;
+    }
+
+    h2 {
+        margin-bottom: 10px;
+        color: #333;
+        font-weight: 600;
+    }
+
+    .subtitle {
+        font-size: 14px;
+        color: #666;
+        margin-bottom: 25px;
+    }
+
+    input, select {
+        width: 100%;
+        padding: 12px;
+        border-radius: 10px;
+        border: 1px solid #ccc;
+        margin-bottom: 15px;
+        font-size: 16px;
+        transition: 0.3s;
+    }
+
+    input:focus, select:focus {
+        border-color: #4e73df;
+        box-shadow: 0 0 10px rgba(78,115,223,0.3);
+        transform: scale(1.02);
+    }
+
+    button {
+        width: 100%;
+        padding: 12px;
+        border: none;
+        border-radius: 10px;
+        background: #4e73df;
+        color: white;
+        font-size: 17px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    button:hover {
+        background: #2e59d9;
+        transform: scale(1.03);
+    }
+
+    /* Animación de salida */
+    @keyframes fadeOut {
+        0% { opacity: 1; transform: scale(1); }
+        100% { opacity: 0; transform: scale(0.85); }
+    }
+</style>
+</head>
+
+<body>
+
+<div class="login-card" id="loginCard">
+    <h2>🔐 Acceso</h2>
+    <p class="subtitle">Tienda Emmanuel 2025</p>
+
+    <select id="role">
+        <option value="">Seleccione un rol</option>
+        <option value="admin">Administrador</option>
+        <option value="empleado">Empleado</option>
+    </select>
+
+    <input type="password" id="password" placeholder="Contraseña">
+
+    <button onclick="login()">Ingresar</button>
+</div>
+
+<script>
+function login() {
+    const role = document.getElementById("role").value;
+    const pass = document.getElementById("password").value;
+
+    const adminPass = "M@ben245";
+    const empleadoPass = "roselia0812";
+
+    if ((role === "admin" && pass === adminPass) ||
+        (role === "empleado" && pass === empleadoPass)) {
+
+        const loginCard = document.getElementById("loginCard");
+
+        // Animación de salida suave
+        loginCard.style.animation = "fadeOut 0.6s ease forwards";
+
+        // Redirección tras animación
+        setTimeout(() => {
+            window.location.href = "inventario.html?role=" + role;
+        }, 600);
+
+    } else {
+        alert("Contraseña o rol incorrecto");
+    }
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inventario - Tienda Emmanuel</title>
+
+<style>
+    body {
+        font-family: "Segoe UI", sans-serif;
+        background: #f0f2f5;
+        margin: 0;
+        padding: 20px;
+    }
+
+    h1 {
+        text-align: center;
+        color: #333;
+        margin-bottom: 25px;
+    }
+
+    .container {
+        max-width: 1100px;
+        margin: auto;
+        background: white;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    input, select {
+        padding: 10px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        width: 230px;
+        font-size: 15px;
+    }
+
+    #addRowBtn {
+        padding: 10px 20px;
+        background: #28a745;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+
+    #addRowBtn:hover {
+        background: #218838;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+    }
+
+    th {
+        background: #007bff;
+        color: white;
+        padding: 12px;
+        text-align: left;
+    }
+
+    td {
+        padding: 10px;
+        background: white;
+        border-bottom: 1px solid #eee;
+    }
+
+    tr:hover td {
+        background: #f1f7ff;
+    }
+
+    .deleteBtn {
+        background: #dc3545;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+
+    .deleteBtn:hover {
+        background: #c82333;
+    }
+
+    /* Empleado NO puede borrar */
+    table.empleado .deleteBtn {
+        display: none !important;
+    }
+
+    /* Empleado NO puede editar */
+    table.empleado td[contenteditable="true"] {
+        pointer-events: none;
+        background: #f2f2f2;
+        color: #666;
+    }
+</style>
+
+</head>
+<body>
+
+<h1>📦 Inventario - Tienda Emmanuel</h1>
+
+<div class="container">
+
+    <div class="controls">
+        <input type="text" id="searchInput" placeholder="🔍 Buscar...">
+        <select id="filterCategory">
+            <option value="">Filtrar por categoría</option>
+            <option>Granos</option>
+            <option>Bebidas</option>
+            <option>Lácteos</option>
+            <option>Limpieza</option>
+            <option>Enlatados</option>
+        </select>
+
+        <button id="addRowBtn">➕ Agregar fila</button>
+    </div>
+
+    <table id="inventoryTable">
+        <thead>
+            <tr>
+                <th>Código</th>
+                <th>Nombre</th>
+                <th>Precio U</th>
+                <th>Precio Far</th>
+                <th>Compra</th>
+                <th>Proveedor</th>
+                <th>Eliminar</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+</div>
+
+<script>
+// ------------------------- ROLES ----------------------------
+const params = new URLSearchParams(window.location.search);
+const userRole = params.get("role");
+
+// --------------------- GUARDAR INVENTARIO --------------------
+function saveInventory() {
+    if (userRole === "empleado") return; // Empleado NO puede guardar ni modificar
+    const rows = [];
+    document.querySelectorAll("#inventoryTable tbody tr").forEach(tr => {
+        const rowData = [];
+        tr.querySelectorAll("td").forEach((td, i) => {
+            if (i < 6) { rowData.push(td.innerText.trim()); }
+        });
+        rows.push(rowData);
+    });
+    localStorage.setItem("inventoryData", JSON.stringify(rows));
+}
+
+// --------------------- CARGAR INVENTARIO --------------------
+function loadInventory() {
+    const saved = localStorage.getItem("inventoryData");
+    if (!saved) return;
+
+    const rows = JSON.parse(saved);
+    const tbody = document.querySelector("#inventoryTable tbody");
+    tbody.innerHTML = "";
+
+    rows.forEach(r => {
+        const tr = document.createElement("tr");
+
+        // Si es empleado → NO editable
+        if (userRole === "empleado") {
+            tr.innerHTML = `
+                <td>${r[0] || ""}</td>
+                <td>${r[1] || ""}</td>
+                <td>${r[2] || ""}</td>
+                <td>${r[3] || ""}</td>
+                <td>${r[4] || ""}</td>
+                <td>${r[5] || ""}</td>
+                <td></td>
+            `;
+        } else {
+            tr.innerHTML = `
+                <td contenteditable="true">${r[0] || ""}</td>
+                <td contenteditable="true">${r[1] || ""}</td>
+                <td contenteditable="true">${r[2] || ""}</td>
+                <td contenteditable="true">${r[3] || ""}</td>
+                <td contenteditable="true">${r[4] || ""}</td>
+                <td contenteditable="true">${r[5] || ""}</td>
+                <td><button class="deleteBtn">X</button></td>
+            `;
+        }
+
+        tbody.appendChild(tr);
+    });
+}
+
+// --------------------- AGREGAR FILA ------------------------
+document.getElementById("addRowBtn").addEventListener("click", function() {
+    if (userRole === "empleado") return;
+
+    const table = document.querySelector("#inventoryTable tbody");
+    const row = document.createElement("tr");
+
+    row.innerHTML = `
+        <td contenteditable="true"></td>
+        <td contenteditable="true"></td>
+        <td contenteditable="true"></td>
+        <td contenteditable="true"></td>
+        <td contenteditable="true"></td>
+        <td contenteditable="true"></td>
+        <td><button class="deleteBtn">X</button></td>
+    `;
+
+    table.appendChild(row);
+    saveInventory();
+});
+
+// --------------------- ELIMINAR FILA -----------------------
+document.addEventListener("click", function(e) {
+    if (e.target.classList.contains("deleteBtn")) {
+        if (userRole !== "admin") return;
+        e.target.closest("tr").remove();
+        saveInventory();
+    }
+});
+
+// --------------------- BUSCADOR ----------------------------
+document.getElementById("searchInput").addEventListener("keyup", function() {
+    const search = this.value.toLowerCase();
+    const rows = document.querySelectorAll("#inventoryTable tbody tr");
+
+    rows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        row.style.display = text.includes(search) ? "" : "none";
+    });
+});
+
+// --------------------- FILTRO ----------------------------
+document.getElementById("filterCategory").addEventListener("change", function() {
+    const filter = this.value.toLowerCase();
+    const rows = document.querySelectorAll("#inventoryTable tbody tr");
+
+    rows.forEach(row => {
+        const category = row.children[1]?.innerText.toLowerCase();
+        row.style.display = !filter || category === filter ? "" : "none";
+    });
+});
+
+// --------------------- APLICAR RESTRICCIONES ----------------
+window.onload = function() {
+    loadInventory();
+
+    if (userRole === "empleado") {
+        // Ocultar botón agregar
+        document.getElementById("addRowBtn").style.display = "none";
+
+        // Eliminar botones de borrar
+        document.querySelectorAll(".deleteBtn").forEach(btn => btn.remove());
+    }
+};
+</script>
+
+</body>
+</html>
